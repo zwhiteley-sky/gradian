@@ -1,4 +1,4 @@
-from . import PlayerActionType
+from .common import PlayerActionType
 from abc import ABC, abstractclassmethod, abstractstaticmethod
 from enum import Enum
 from typing import Union
@@ -106,7 +106,7 @@ class HideCollectionModAct:
     
     collection_id (int): The unique identifier of the collection.
     """
-    pass
+    ACTION_NAME = "hide-collection"
 
 
 @mod_act("id", "name", "description", "img_url")

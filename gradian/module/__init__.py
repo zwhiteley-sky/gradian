@@ -1,37 +1,71 @@
-from enum import Enum
+from abc import ABC, abstractclassmethod, abstractstaticmethod
+from .common import *
+from .module_events import *
+from .module_actions import *
 
 
-class PlayerActionType(Enum):
+class ActionList:
     """
-    The actions a player can perform.
-    """
-
-    NEXT = 0
-    """They can click the next button."""
-
-    SELECT = 1
-    """They can select a card (id provided as data)."""
-
-    AGAINST = 2
-    """
-    They can select a card and play it against another card.
-    
-    Array provided as data: 0th entry is the selectable card id,
-    all subsequent entries are against candidates.
+    The actions to be performed by a module.
     """
 
-    WILD = 3
+    def __init__(self, player_ids: list[int]) -> None:
+        self.player_lists = {
+            player_id: [] for player_id in player_ids
+        }
+
+    def send(self, player_id: int, action: ModAct):
+        """
+        Send an action to an individual player. Actions are processed
+        in the order which they are sent.
+
+        Args:
+            player_id (int): The unique identifier of the player to send it to.
+            action (ModAct): The action to send.
+
+        Raises:
+            ValueError: If the player id does not exist.
+        """
+
+        player_list = self.player_lists[player_id]
+
+        if player_list is None:
+            raise ValueError("player_id is invalid")
+
+        player_list.append(action)
+
+    def broadcast(self, action: ModAct):
+        """
+        Broadcast an action to all players. This is the same as called
+        `send` for each individual player.
+
+        Args:
+            action (ModAct): The action to send.
+        """
+
+        for player_list in self.player_lists.values():
+            player_list.append(action)
+
+
+class Module(ABC):
     """
-    The card is wild and can have its type changed.
-    
-    Array provided as data: 0th entry is the selectable card id,
-    all subsequent entries type ids. NOTE: all type ids must have
-    been shown to the player prior.
+    The base class of a card module.
     """
 
-    SELECT_COLLECTION = 4
-    """
-    The player can select a collection (usually a deck in the centre).
+    @abstractstaticmethod
+    def create_module() -> object:
+        """Create a fresh instance of the module."""
+        pass
 
-    The collection id is provided as data.
-    """
+    @abstractclassmethod
+    def process_event(self, event: Event) -> ActionList:
+        """
+        Process an event from a client.
+
+        Args:
+            event (Event): The event to process.
+
+        Returns:
+            ActionList: The list of actions to send to each player.
+        """
+        pass
