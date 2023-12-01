@@ -10,40 +10,33 @@ class ModMsg(ABC):
     pass
 
 
-class AcceptPlayersModMsg(ModMsg):
+class Open:
     """
-    The module is currently accepting players.
-    """
-
-    pass
-
-
-class RejectPlayersModMsg(ModMsg):
-    """
-    The module is currently closed to new players.
-    """
-
-    def __init__(self, reason: str) -> None:
-        super().__init__()
-        self.reason = reason
-
-
-class CanStartModMsg(ModMsg):
-    """
-    A new round of the game can be started.
+    An action is able to be performed.
     """
 
     pass
 
 
-class CannotStartModMsg(ModMsg):
+class Closed:
     """
-    A round of the game cannot be started.
+    An action is not able to be performed.
     """
 
     def __init__(self, reason: str) -> None:
-        super().__init__()
         self.reason = reason
+
+
+class ChangeStateModMsg(ModMsg):
+    """
+    Change the state of the card game (e.g., whether it is accepting new players,
+    whether it can be started).
+    """
+
+    def __init__(self, join_mode: Union[Open, Closed], start_mode: Union[Open, Closed]) -> None:
+        super().__init__()
+        self.join_mode = join_mode
+        self.start_mode = start_mode
 
 
 class EndRoundModMsg(ModMsg):
