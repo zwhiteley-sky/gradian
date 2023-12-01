@@ -4,7 +4,17 @@ from .module_events import *
 from .module_actions import *
 
 
-class ActionList:
+class ActionLists(ABC):
+    @abstractclassmethod
+    def __len__(self):
+        pass
+
+    @abstractclassmethod
+    def __iter__(self):
+        pass
+
+
+class SimpleActionLists(ActionLists):
     """
     The actions to be performed by a module.
     """
@@ -46,6 +56,23 @@ class ActionList:
         for player_list in self.player_lists.values():
             player_list.append(action)
 
+    def broadcast_except(self, excl: list[int], action: ModAct):
+        for player_id in self.player_lists:
+            if player_id in excl:
+                continue
+            
+            self.send(player_id, action)
+
+    def __len__(self):
+        return len(self.player_lists)
+
+    def __iter__(self):
+        return iter(self.player_lists.items())
+
+
+class ModuleError(Exception):
+    pass
+
 
 class Module(ABC):
     """
@@ -53,12 +80,12 @@ class Module(ABC):
     """
 
     @abstractstaticmethod
-    def create_module() -> object:
+    def create_module() -> any:
         """Create a fresh instance of the module."""
         pass
 
     @abstractclassmethod
-    def process_event(self, event: Event) -> ActionList:
+    def process_event(self, event: Event) -> ActionLists:
         """
         Process an event from a client.
 
