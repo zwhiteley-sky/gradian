@@ -9,22 +9,53 @@ from websockets import WebSocketServerProtocol
 
 
 class EngineManager:
+    """
+    An engine manager.
+    
+    This manages all open engines, including interactions with them
+    (e.g., to allow a new player to join).
+    """
+
     def __init__(self) -> None:
         self.next_engine_id = 0
         self.engines: dict[int, Queue[WebSocketServerProtocol]] = {}
 
     async def create(self, module: type[Module], websocket: WebSocketServerProtocol) -> None:
+        """
+        Create a new engine.
+
+        Args:
+            module (type[Module]): The card module to instantiate.
+            websocket (WebSocketServerProtocol): The connection to the creator.
+        """
+
+        # A queue is used to communicate with the engine (e.g., to notify of
+        # new players). The first entry will always be the first player.
         queue = Queue()
         await queue.put(websocket)
 
+        # Record the engine information
         engine_id = self.next_engine_id
         self.next_engine_id += 1
         self.engines[engine_id] = queue
+        
+        # Create a new engine task (allows this function to return
+        # which asynchronously scheduling the engine).
         asyncio.create_task(engine(engine_id, self, module, queue))
 
     async def join(self, game_id: int, websocket: WebSocketServerProtocol) -> None:
+        """
+        Join a pre-existing game.
+
+        Args:
+            game_id (int): The unique identifier of the game to join.
+            websocket (WebSocketServerProtocol): The connection to the joiner.
+        """
+        
+        # Get the engine running the corresponding game
         queue = self.engines.get(game_id)
 
+        # If the game doesn't exist, send an error
         if queue is None:
             await websocket.send(json.dumps({
                 "type": "error",
@@ -32,21 +63,46 @@ class EngineManager:
             }))
             return
 
+        # Send the connection to the engine (where it will understand
+        # it is a notification of a new player joining).
         await queue.put(websocket)
 
 
 class WsWrapper:
+    """
+    A wrapper for a WebSocket connection which handles the serialisation/deserialisation
+    of WebSocket messages for you, automatically. This was done to separate the
+    parsing code from the engine code.
+    """
+
     def __init__(self, ws: WebSocketServerProtocol) -> None:
         self.ws = ws
 
     @staticmethod
     def parse_response(response: dict) -> Union[WsMsg, None]:
+        """
+        Parse a response into a WsMsg.
+        
+        All WebSocket communications, at least for this implementation,
+        are considered to be JSON objects -- any non-JSON object messages
+        are invalid.
+
+        Args:
+            response (dict): The dictionary.
+
+        Returns:
+            Union[WsMsg, None]: The WebSocket message (None if invalid).
+        """
+
+        # The introduction message (when the player first joins to set their name)
         if response.get("type") == "intro" and isinstance(response.get("player-name"), str):
             return WsIntroMsg(response["player-name"])
 
+        # The start round command
         elif response.get("type") == "start-round":
             return WsStartMsg()
 
+        # The action command (e.g., select a card)
         elif response.get("type") == "action":
             action_type = response.get("action-type")
 
@@ -86,6 +142,17 @@ class WsWrapper:
         return None
 
     async def send_intro(self, game_id: int, player_id: int) -> bool:
+        """
+        Send an introductory response (giving the game and player identifiers).
+
+        Args:
+            game_id (int): The unique identifier of the game.
+            player_id (int): The unique identifier of the newly joined player.
+
+        Returns:
+            bool: Whether it was sent successfully (can be safely ignored).
+        """
+
         return await self._send({
             "type": "intro",
             "game_id": game_id,
@@ -93,6 +160,16 @@ class WsWrapper:
         })
 
     async def send_gracts(self, gracts: list[Gract]) -> bool:
+        """
+        Send a list of gractions.
+
+        Args:
+            gracts (list[Gract]): The gractions.
+
+        Returns:
+            bool: Whether it was sent successfully (can be safely ignored).
+        """
+
         gract_list = []
 
         for gract in gracts:
@@ -211,24 +288,63 @@ class WsWrapper:
         })
 
     async def send_end_round(self, reason: str) -> bool:
+        """
+        Send the end round message.
+
+        Args:
+            reason (str): The reason the round is ending.
+
+        Returns:
+            bool: Whether the message was sent successfully (can be ignored).
+        """
+
         return await self._send({
             "type": "end-round",
             "reason": reason
         })
 
     async def send_end_game(self, reason: str) -> bool:
+        """
+        Send the end game message.
+
+        Args:
+            reason (str): The reason the game is ending.
+
+        Returns:
+            bool: Whether the message was sent successfully (can be safely ignored).
+        """
+
         return await self._send({
             "type": "end-game",
             "reason": reason
         })
 
     async def send_error(self, reason: str) -> bool:
+        """
+        Send an error message.
+
+        Args:
+            reason (str): The error.
+
+        Returns:
+            bool: Whether it was sent successfully (can be safely ignored).
+        """
+
         return await self._send({
             "type": "error",
             "reason": reason
         })
 
     async def recv(self) -> Union[WsMsg, None]:
+        """
+        Receive a message from the WebSocket.
+        
+        Waits until a message can be returned, or the connection closes.
+
+        Returns:
+            Union[WsMsg, None]: The message, or None if the connection closed/message was invalid.
+        """
+
         try:
             # Get the response
             response = await self.ws.recv()
@@ -271,35 +387,73 @@ class WsWrapper:
             return False
 
     async def close(self):
+        """
+        Close the connection.
+        """
         await self.ws.close()
 
 
 class WsMsg(ABC):
+    """
+    A WebSocket message.
+    """
+
     pass
 
 
 class WsIntroMsg(WsMsg):
+    """
+    An introductory message specifying the name of the new player.
+    
+    This is the first message sent over any WebSocket connection.
+    """
+
     def __init__(self, player_name: str) -> None:
         super().__init__()
         self.player_name = player_name
 
 
 class WsStartMsg(WsMsg):
+    """
+    A message requesting a round of the game to start.
+    """
+
     pass
 
 
 class WsActionMsg(WsMsg):
+    """
+    A message specifying the action a specific player took.
+    """
+
     def __init__(self, action: Action) -> None:
         super().__init__()
         self.action = action
 
 
 class WsCloseMsg(WsMsg):
+    """
+    A message indicating the connection was closed.
+    """
+
     pass
 
 
 class Player:
+    """
+    A player in the game.
+    """
+
     def __init__(self, id: int, name: str, ws: WsWrapper) -> None:
+        """
+        Create a new player.
+
+        Args:
+            id (int): The unique identifier of the player.
+            name (str): The name of the player.
+            ws (WsWrapper): The connection to the player.
+        """
+
         self.id = id
         self.name = name
         self.ws = ws
@@ -307,6 +461,16 @@ class Player:
 
 
 async def engine(id: int, manager: EngineManager, module: type[Module], queue: Queue[WebSocketServerProtocol]):
+    """
+    The engine which runs a game.
+
+    Args:
+        id (int): The unique identifier the game is running under.
+        manager (EngineManager): The engine manager which created the engine.
+        module (type[Module]): The module to instantiate.
+        queue (Queue[WebSocketServerProtocol]): The queue on which new players are sent.
+    """
+
     # Instantiate the module
     instance: Module = module.create_module()
     response = instance.process_msg(InitEngMsg())
