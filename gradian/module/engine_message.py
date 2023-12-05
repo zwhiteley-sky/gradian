@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..common import *
+from common import *
 
 
 class EngMsg(ABC):
@@ -25,7 +25,7 @@ class InitEngMsg(EngMsg):
 class PlayerJoinEngMsg(EngMsg):
     """
     A player has joined the game.
-    
+
     NOTE: this must only be sent if the game is currently accepting
     new players.
     """
@@ -34,8 +34,8 @@ class PlayerJoinEngMsg(EngMsg):
         super().__init__()
         self.player_id = player_id
         self.player_name = player_name
-        
-    
+
+
 class PlayerLeaveEngMsg(EngMsg):
     """
     A player has left the game.
@@ -44,12 +44,12 @@ class PlayerLeaveEngMsg(EngMsg):
     def __init__(self, player_id: int) -> None:
         super().__init__()
         self.player_id = player_id
-        
-        
+
+
 class StartRoundEngMsg(EngMsg):
     """
     Start a round of the game.
-    
+
     NOTE: this must only be sent if the round can be started, and it has not already
     been started.
     """
@@ -60,7 +60,7 @@ class StartRoundEngMsg(EngMsg):
 class EndRoundEngMsg(EngMsg):
     """
     End the current round of the game.
-    
+
     NOTE: this must only be sent if the round has been started and has not ended.
     """
 

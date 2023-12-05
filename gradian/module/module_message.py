@@ -1,10 +1,18 @@
 from abc import ABC
-from ..common import *
+from common import *
 
 
 class ModMsg(ABC):
     """
     A message from the module to the engine.
+    """
+
+    pass
+
+
+class EmptyModMsg(ModMsg):
+    """
+    There is nothing to do.
     """
 
     pass
