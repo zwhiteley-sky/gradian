@@ -1,5 +1,5 @@
 from abc import ABC
-from common import *
+from ..common import *
 
 
 class ModMsg(ABC):

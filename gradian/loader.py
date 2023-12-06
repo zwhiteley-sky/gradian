@@ -1,5 +1,5 @@
 import glob
-import module
+from . import module
 import zipimport
 
 def load_modules() -> list[type[module.Module]]:

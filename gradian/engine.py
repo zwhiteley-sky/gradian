@@ -4,7 +4,7 @@ import asyncio
 import json
 from abc import ABC
 from asyncio import Queue, FIRST_COMPLETED
-from module import *
+from .module import *
 from websockets import WebSocketServerProtocol
 
 
@@ -61,6 +61,7 @@ class EngineManager:
                 "type": "error",
                 "reason": "game does not exist"
             }))
+            await websocket.close()
             return
 
         # Send the connection to the engine (where it will understand
@@ -155,8 +156,8 @@ class WsWrapper:
 
         return await self._send({
             "type": "intro",
-            "game_id": game_id,
-            "player_id": player_id
+            "game-id": game_id,
+            "player-id": player_id
         })
 
     async def send_gracts(self, gracts: list[Gract]) -> bool:
@@ -184,16 +185,16 @@ class WsWrapper:
                     display = "stack"
 
                 gract_list.append({
-                    "type": "show-collection",
+                    "type": "show-coll",
                     "player-id": gract.player_id,
-                    "collection-id": gract.collection_id,
-                    "collection-display": display
+                    "coll-id": gract.collection_id,
+                    "coll-display": display
                 })
 
             elif isinstance(gract, HideCollectionGract):
                 gract_list.append({
-                    "type": "hide-collection",
-                    "collection-id": gract.collection_id
+                    "type": "hide-coll",
+                    "coll-id": gract.collection_id
                 })
 
             elif isinstance(gract, ShowTypeGract):
@@ -210,7 +211,7 @@ class WsWrapper:
                     "type": "show-card",
                     "card-id": gract.card_id,
                     "type-id": gract.type_id,
-                    "collection-id": gract.collection_id
+                    "coll-id": gract.collection_id
                 })
 
             elif isinstance(gract, HideCardGract):
@@ -239,7 +240,7 @@ class WsWrapper:
                 gract_list.append({
                     "type": "move-card",
                     "card-id": gract.card_id,
-                    "collection-id": gract.collection_id
+                    "coll-id": gract.collection_id
                 })
 
             elif isinstance(gract, PossibleActionsGract):
