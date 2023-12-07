@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-from ..common import *
+from abc import ABC
+from .common import *
 
 
 class EngMsg(ABC):

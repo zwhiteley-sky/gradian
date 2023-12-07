@@ -4,7 +4,7 @@ import asyncio
 import json
 from abc import ABC
 from asyncio import Queue, FIRST_COMPLETED
-from .module import *
+from common import *
 from websockets import WebSocketServerProtocol
 
 

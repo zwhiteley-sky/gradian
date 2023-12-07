@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractstaticmethod, abstractclassmethod
 from enum import Enum
 from typing import Union
 
@@ -312,7 +312,7 @@ class SimpleGractLists(GractLists):
         }
 
     def __iter__(self):
-        return filter(lambda item : len(item[1]) != 0, self.gract_lists.items())
+        return filter(lambda item: len(item[1]) != 0, self.gract_lists.items())
 
     def send(self, player_id: int, gract: Gract):
         self.gract_lists[player_id].append(gract)

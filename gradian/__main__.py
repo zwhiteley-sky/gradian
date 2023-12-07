@@ -1,10 +1,9 @@
 import asyncio
-import engine
-import loader
+from . import engine, loader
 
 from websockets import WebSocketServerProtocol, serve
 
-modules = loader.load_modules()
+modules = loader.load_modules("./modules/")
 if len(modules) == 0:
     print("ERROR: no modules found!")
     exit(-1)

@@ -1,8 +1,8 @@
+import common
 import glob
-from . import module
 import zipimport
 
-def load_modules() -> list[type[module.Module]]:
+def load_modules(path: str) -> list[type[common.Module]]:
     """
     Load all the modules within the `modules/` directory.
 
@@ -11,14 +11,19 @@ def load_modules() -> list[type[module.Module]]:
     """
 
     modules = []
-    files = glob.glob("./modules/*.zip")
+    files = glob.glob(f"{path}*.zip")
 
     for file in files:
         try: 
             importer = zipimport.zipimporter(file)
-            module = importer.load_module("entry")
+            module = importer.load_module("module")
             if module.Module is not None:
                 modules.append(module.Module)
-        except: pass
+        except Exception as e:
+            print(f"Module Error for file {file}")
+            print("======================")
+            print(e)
+            print("======================")
+            print()
 
     return modules
