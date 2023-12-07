@@ -1,0 +1,84 @@
+@keyframes rainbow-image {
+    // All the following values were calculated using https://isotropic.co/tool/hex-color-to-css-filter/
+    0% {
+        filter: invert(13%) sepia(73%) saturate(6066%) hue-rotate(353deg) brightness(98%) contrast(97%);
+    }
+
+    #{calc(100 / 7)}% {
+        filter: invert(79%) sepia(36%) saturate(6379%) hue-rotate(359deg) brightness(102%) contrast(108%);
+    }
+
+    #{calc(200 / 7)}% {
+        filter: invert(73%) sepia(57%) saturate(512%) hue-rotate(12deg) brightness(110%) contrast(104%);
+    }
+
+    #{calc(300 / 7)}% {
+        filter: invert(74%) sepia(76%) saturate(2254%) hue-rotate(38deg) brightness(95%) contrast(84%);
+    }
+
+    #{calc(400 / 7)}% {
+        filter: invert(38%) sepia(95%) saturate(924%) hue-rotate(198deg) brightness(98%) contrast(85%);
+    }
+
+    #{calc(500 / 7)}% {
+        filter: invert(23%) sepia(78%) saturate(1284%) hue-rotate(230deg) brightness(87%) contrast(99%);
+    }
+
+    #{calc(600 / 7)}% {
+        filter: invert(25%) sepia(14%) saturate(6336%) hue-rotate(249deg) brightness(95%) contrast(93%);
+    }
+
+    #{calc(700 / 7)}% {
+        filter: invert(13%) sepia(73%) saturate(6066%) hue-rotate(353deg) brightness(98%) contrast(97%);
+    }
+}
+
+@keyframes rainbow-loading {
+    0% {
+        left: 0;
+    }
+    100% {
+        left: -100%;
+    }
+}
+
+.header {
+    // Header positioning
+    position: sticky;
+    top: 0;
+    height: 4rem;
+
+    // Header styling
+    box-shadow: 0 1px 15px 2px black;
+
+    // Item positioning
+    display: flex;
+    align-items: center;
+    overflow-x: hidden;
+
+    .bar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 200%;
+        background: linear-gradient(to right, #e81416, #ffa500, #faeb36, #79c314, #487de7, #4b369d, #70369d, #e81416, #ffa500, #faeb36, #79c314, #487de7, #4b369d, #70369d );
+        background-repeat: repeat-x;
+    
+        &.loading {
+            animation: infinite linear rainbow-loading 1s;
+        }
+    }
+
+    h1, img {
+        animation: infinite alternate rainbow-image 5s;
+    }
+
+    img {
+        height: 3rem;
+    }
+
+    h1 {
+        font-size: 3rem;
+    }
+}
