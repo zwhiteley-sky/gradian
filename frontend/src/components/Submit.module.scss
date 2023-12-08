@@ -1,0 +1,29 @@
+.rainbow-border {
+  padding: 5px;
+  border-radius: 25px;
+  background: linear-gradient(to right, var(--rainbow));
+
+  &.disabled {
+    background: #aaa;
+  }
+}
+
+.submit-button {
+  text-align: center;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  color: black;
+  background: white;
+
+  &:hover {
+    color: white;
+    background: linear-gradient(to right, var(--rainbow));
+  }
+
+  &:disabled {
+    color: white;
+    background: linear-gradient(to bottom right, lightgray, darkgray);
+  }
+}

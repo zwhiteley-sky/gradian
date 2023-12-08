@@ -3,10 +3,23 @@
   src: url(/fonts/Ubuntu-Regular.ttf);
 }
 
-html, body {
+:root {
+  --rainbow: #e81416, #ffa500, #faeb36, #79c314, #487de7, #4b369d, #70369d, #e81416;
+}
+
+html, body, #root-content {
   font-family: ubuntu;
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
+}
+
+#root-content {
+  display: flex;
+  flex-direction: column;
+}
+
+#root-content > *:last-child {
+  flex-grow: 1;
 }

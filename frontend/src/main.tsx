@@ -1,12 +1,13 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
-import App from "./App.tsx"
 import Layout from "./Layout.tsx"
 import {
   createBrowserRouter,
   RouterProvider
 } from "react-router-dom"
 import "./index.css"
+import CreateGame from "./pages/CreateGame.tsx"
+import JoinGame from "./pages/JoinGame.tsx"
 
 const router = createBrowserRouter([
   {
@@ -14,7 +15,15 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <App />
+        element: <JoinGame />
+      },
+      {
+        path: "/join",
+        element: <JoinGame />
+      },
+      {
+        path: "/create",
+        element: <CreateGame />
       }
     ]
   }

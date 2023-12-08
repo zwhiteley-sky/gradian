@@ -1,0 +1,29 @@
+.positioner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rainbow-border {
+  $border-radius: 20px;
+  $padding: 2px;
+  box-shadow: 2px 2px 20px 0 gray;
+  border-radius: calc($border-radius + $padding);
+  padding: $padding;
+  background: linear-gradient(to bottom right, var(--rainbow));
+
+  .form {
+    border-radius: calc($border-radius);
+    background-color: white;
+    padding: 20px;
+
+    h1 {
+      margin-bottom: 50px;
+      text-align: center;
+    }
+
+    input {
+      font-size: 1.5rem;
+    }
+  }
+}

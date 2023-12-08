@@ -1,0 +1,37 @@
+.rainbow-border {
+  $border-radius: 10px;
+  $padding: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 5px 0;
+  border-radius: calc($border-radius + $padding);
+  padding: $padding;
+  
+  &.initial {
+    background: linear-gradient(to bottom right, lightgray, darkgray)
+  }
+
+  &.valid {
+    background: linear-gradient(to bottom right, lightgreen, darkgreen);
+  }
+
+  &.invalid {
+    background: linear-gradient(to bottom right, red, darkred);
+  }
+
+  input {
+    border: none;
+    outline: none;
+    border-radius: $border-radius;
+    width: calc(100% - 2 * $padding);
+    padding-left: 5px;
+  }
+}
+
+.error-text {
+  text-align: center;
+  color: red;
+}
