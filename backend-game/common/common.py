@@ -320,3 +320,8 @@ class SimpleGractLists(GractLists):
     def broadcast(self, gract: Gract):
         for list in self.gract_lists.values():
             list.append(gract)
+
+    def broadcast_except(self, except_id: int, gract: Gract):
+        for player_id, list in self.gract_lists.items():
+            if player_id == except_id: continue
+            list.append(gract)

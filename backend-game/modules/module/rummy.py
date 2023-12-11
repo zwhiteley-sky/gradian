@@ -6,7 +6,7 @@ from common import *
 card_types = []
 id_stack = []
 
-card_types.append(ShowTypeGract(0, "Unknown", "The card type is unknown", ""))
+card_types.append(ShowTypeGract(0, "Unknown", "The card type is unknown", "/playing-cards/0.svg"))
 
 for suit_no, suit in enumerate(["Clubs", "Diamonds", "Hearts", "Spades"]):
     for rank_no, rank in enumerate(["Ace", *list("23456789"), "10", "Jack", "Queen", "King"]):
@@ -15,7 +15,7 @@ for suit_no, suit in enumerate(["Clubs", "Diamonds", "Hearts", "Spades"]):
             suit_no * 100 + rank_no + 1,
             f"{rank} of {suit}",
             f"{rank} of {suit}",
-            ""
+            f"/playing-cards/{suit_no * 100 + rank_no + 1}.svg"
         ))
 
 
@@ -89,6 +89,9 @@ class RummyModule(Module):
                 for card in player.cards:
                     gract_lists.send(
                         player.id, ShowCardGract(card, card, player.id))
+                    gract_lists.broadcast_except(
+                        player.id, ShowCardGract(card, 0, player.id)
+                    )
 
             self.player_order = list(self.players.keys())
             self.current_idx = 0

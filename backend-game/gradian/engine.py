@@ -142,17 +142,49 @@ class WsWrapper:
 
         return None
 
-    async def send_intro(self, game_id: int, player_id: int, others: list[Player]) -> bool:
+    async def send_intro(
+        self,
+        game_id: int,
+        player_id: int,
+        players: list[Player],
+        join_mode: Union[Open, Closed],
+        start_mode: Union[Open, Closed]
+    ) -> bool:
         """
         Send an introductory response (giving the game and player identifiers).
 
         Args:
             game_id (int): The unique identifier of the game.
             player_id (int): The unique identifier of the newly joined player.
+            players (list[Player]): The entire list of players currently in the
+                game, including the player who just joined.
 
         Returns:
             bool: Whether it was sent successfully (can be safely ignored).
         """
+
+        join_mode_dict = None
+        start_mode_dict = None
+
+        if isinstance(join_mode, Closed):
+            join_mode_dict = {
+                "status": "closed",
+                "reason": join_mode.reason
+            }
+        else:
+            join_mode_dict = {
+                "status": "open",
+            }
+
+        if isinstance(start_mode, Closed):
+            start_mode_dict = {
+                "status": "closed",
+                "reason": start_mode.reason
+            }
+        else:
+            start_mode_dict = {
+                "status": "open",
+            }
 
         return await self._send({
             "type": "intro",
@@ -161,7 +193,96 @@ class WsWrapper:
             "players": [{
                 "id": player.id,
                 "name": player.name
-            } for player in others]
+            } for player in players],
+            "join-mode": join_mode_dict,
+            "start-mode": start_mode_dict
+        })
+
+    async def send_player_join(self, player_id: int, player_name: str) -> bool:
+        """
+        Send a message indicating a new player joined.
+
+        Args:
+            player_id (int): The unique identifier of the new player.
+            player_name (str): The name of the new player.
+
+        Returns:
+            bool: Whether the message was sent successfully.
+        """
+
+        return await self._send({
+            "type": "player-join",
+            "player-id": player_id,
+            "player-name": player_name
+        })
+
+    async def send_player_leave(self, player_id: int) -> bool:
+        """
+        Send a message indicating an existing player has left.
+
+        Args:
+            player_id (int): The unique identifier of the player who left.
+
+        Returns:
+            bool: Whether the message was sent successfully.
+        """
+
+        return await self._send({
+            "type": "player-leave",
+            "player-id": player_id
+        })
+
+    async def send_status_update(self, join_mode: Union[Open, Closed], start_mode: Union[Open, Closed]) -> bool:
+        """
+        Send a message indicating the status of the game has changed.
+
+        Args:
+            join_mode (Union[Open, Closed]): The join mode of the game.
+            start_mode (Union[Open, Closed]): The start mode of the game.
+
+        Returns:
+            bool: Whether the message was sent successfully.
+        """
+
+        join_mode_dict = None
+        start_mode_dict = None
+
+        if isinstance(join_mode, Closed):
+            join_mode_dict = {
+                "status": "closed",
+                "reason": join_mode.reason
+            }
+        else:
+            join_mode_dict = {
+                "status": "open"
+            }
+
+        if isinstance(start_mode, Closed):
+            start_mode_dict = {
+                "status": "closed",
+                "reason": start_mode.reason
+            }
+        else:
+            start_mode_dict = {
+                "status": "open"
+            }
+
+        return await self._send({
+            "type": "status-change",
+            "join-mode": join_mode_dict,
+            "start-mode": start_mode_dict
+        })
+
+    async def send_start_round(self) -> bool:
+        """
+        Send a message indicating the round has started.
+
+        Returns:
+            bool: Whether the message was sent successfully.
+        """
+
+        return await self._send({
+            "type": "start-round"
         })
 
     async def send_gracts(self, gracts: list[Gract]) -> bool:
@@ -565,9 +686,18 @@ async def engine(id: int, manager: EngineManager, module: type[Module], queue: Q
                 if isinstance(join_mode, Open):
                     players[msg.player_id] = new_joins[msg.player_id]
                     del new_joins[msg.player_id]
+
+                    # Send an introductory message to the new player
                     await players[msg.player_id] \
                         .ws \
-                        .send_intro(id, msg.player_id, players.values())
+                        .send_intro(id, msg.player_id, players.values(), join_mode, start_mode)
+
+                    # Notify the other players of the new player
+                    for player in players.values():
+                        if player.id == msg.player_id:
+                            continue
+                        await player.ws.send_player_join(msg.player_id, msg.player_name)
+
                     player_tasks[msg.player_id] = asyncio.create_task(
                         players[msg.player_id].ws.recv())
 
@@ -584,6 +714,10 @@ async def engine(id: int, manager: EngineManager, module: type[Module], queue: Q
                     del manager.engines[id]
                     return
 
+                # Otherwise, send a leave message to all players
+                for player in players.values():
+                    await player.ws.send_player_leave(msg.player_id)
+
             elif isinstance(msg, StartRoundEngMsg):
                 if round_active or isinstance(start_mode, Closed):
                     player = players[msg.player_id]
@@ -591,6 +725,11 @@ async def engine(id: int, manager: EngineManager, module: type[Module], queue: Q
                     continue
                 else:
                     round_active = True
+
+                    # Send a message to all players indicating the round
+                    # has started
+                    for player in players.values():
+                        await player.ws.send_start_round()
 
             elif isinstance(msg, EndRoundEngMsg) and not round_active:
                 continue
@@ -655,6 +794,10 @@ async def engine(id: int, manager: EngineManager, module: type[Module], queue: Q
             if isinstance(response, ChangeStateModMsg):
                 join_mode = response.join_mode
                 start_mode = response.start_mode
+
+                # Send a message to all players indicating the state change
+                for player in players.values():
+                    await player.ws.send_status_update(join_mode, start_mode)
 
             elif isinstance(response, EndRoundModMsg):
                 round_active = False
