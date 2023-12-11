@@ -11,7 +11,7 @@ from websockets import WebSocketServerProtocol
 class EngineManager:
     """
     An engine manager.
-    
+
     This manages all open engines, including interactions with them
     (e.g., to allow a new player to join).
     """
@@ -38,7 +38,7 @@ class EngineManager:
         engine_id = self.next_engine_id
         self.next_engine_id += 1
         self.engines[engine_id] = queue
-        
+
         # Create a new engine task (allows this function to return
         # which asynchronously scheduling the engine).
         asyncio.create_task(engine(engine_id, self, module, queue))
@@ -51,7 +51,7 @@ class EngineManager:
             game_id (int): The unique identifier of the game to join.
             websocket (WebSocketServerProtocol): The connection to the joiner.
         """
-        
+
         # Get the engine running the corresponding game
         queue = self.engines.get(game_id)
 
@@ -83,7 +83,7 @@ class WsWrapper:
     def parse_response(response: dict) -> Union[WsMsg, None]:
         """
         Parse a response into a WsMsg.
-        
+
         All WebSocket communications, at least for this implementation,
         are considered to be JSON objects -- any non-JSON object messages
         are invalid.
@@ -142,7 +142,7 @@ class WsWrapper:
 
         return None
 
-    async def send_intro(self, game_id: int, player_id: int) -> bool:
+    async def send_intro(self, game_id: int, player_id: int, others: list[Player]) -> bool:
         """
         Send an introductory response (giving the game and player identifiers).
 
@@ -157,7 +157,11 @@ class WsWrapper:
         return await self._send({
             "type": "intro",
             "game-id": game_id,
-            "player-id": player_id
+            "player-id": player_id,
+            "players": [{
+                "id": player.id,
+                "name": player.name
+            } for player in others]
         })
 
     async def send_gracts(self, gracts: list[Gract]) -> bool:
@@ -339,7 +343,7 @@ class WsWrapper:
     async def recv(self) -> Union[WsMsg, None]:
         """
         Receive a message from the WebSocket.
-        
+
         Waits until a message can be returned, or the connection closes.
 
         Returns:
@@ -405,7 +409,7 @@ class WsMsg(ABC):
 class WsIntroMsg(WsMsg):
     """
     An introductory message specifying the name of the new player.
-    
+
     This is the first message sent over any WebSocket connection.
     """
 
@@ -561,7 +565,9 @@ async def engine(id: int, manager: EngineManager, module: type[Module], queue: Q
                 if isinstance(join_mode, Open):
                     players[msg.player_id] = new_joins[msg.player_id]
                     del new_joins[msg.player_id]
-                    await players[msg.player_id].ws.send_intro(id, msg.player_id)
+                    await players[msg.player_id] \
+                        .ws \
+                        .send_intro(id, msg.player_id, players.values())
                     player_tasks[msg.player_id] = asyncio.create_task(
                         players[msg.player_id].ws.recv())
 
