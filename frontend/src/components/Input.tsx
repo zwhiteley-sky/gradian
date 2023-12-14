@@ -88,6 +88,7 @@ export default function Input({
         },
       });
     },
+    value: state.value,
     valid: state.validity.type == "valid"
   };
 }

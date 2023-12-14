@@ -1,0 +1,36 @@
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  backdrop-filter: blur(40px);
+}
+
+body:has(.background) {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
+  padding: 30px;
+  color: white;
+  max-width: 80%;
+
+  background: radial-gradient(
+      circle at top 20% left 20%,
+      #e81416dd,
+      transparent 60%
+    ),
+    radial-gradient(circle at top 10% right 10%, #ffa500dd, transparent 60%),
+    radial-gradient(circle at center, #79c314dd, transparent 80%),
+    radial-gradient(circle at bottom 30% left 20%, #487de7dd, transparent 60%),
+    radial-gradient(circle at bottom 20% right 30%, #70369ddd, transparent 60%);
+}

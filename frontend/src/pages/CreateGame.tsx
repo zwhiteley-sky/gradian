@@ -1,12 +1,14 @@
 import styles from "./CreateGame.module.scss";
 import Input from "../components/Input";
 import Submit from "../components/Submit";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useLoading } from "../providers/LoadingProvider";
+import Player from "../components/Player";
 
 export default function CreateGame() {
-  const [loading, setLoading] = useLoading();
-  const { Element: ModuleIdInput, valid: moduleIdValid } = Input({
+  const [loading,] = useLoading();
+  const [player, setPlayer] = useState(null as any);
+  const { Element: ModuleIdInput, value: moduleId, valid: moduleIdValid } = Input({
     name: "module-id",
     placeholder: "Module ID",
     onValidate(value: string) {
@@ -16,7 +18,7 @@ export default function CreateGame() {
       return null;
     }
   });
-  const { Element: PlayerNameInput, valid: playerNameValid } = Input({
+  const { Element: PlayerNameInput, value: playerName, valid: playerNameValid } = Input({
     name: "player-name",
     placeholder: "Enter your player name",
     onValidate(value: string) {
@@ -25,16 +27,23 @@ export default function CreateGame() {
     }
   });
 
-  function handlSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
+    setPlayer({
+      type: "create",
+      moduleId: Number(moduleId),
+      playerName
+    });
+  }
+
+  if (player) {
+    return <Player request={player} />
   }
 
   return (
     <div className={styles.positioner}>
       <div className={styles["rainbow-border"]}>
-        <form className={styles.form} onSubmit={handlSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <h1>Create a new game!</h1>
           { ModuleIdInput }
           { PlayerNameInput }

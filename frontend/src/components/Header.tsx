@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useLoading } from "../providers/LoadingProvider";
 import styles from "./Header.module.scss";
 
@@ -13,8 +14,14 @@ export default function Header() {
 
   return (
     <header className={styles.header}>
-      <img src={"/logo.svg"} alt="Gradian Logo"></img>
-      <h1>Gradian</h1>
+      <div>
+        <img src={"/logo.svg"} alt="Gradian Logo"></img>
+        <h1>Gradian</h1>
+      </div>
+      <div>
+        <Link to="/join">Join</Link>
+        <Link to="/create">Create</Link>
+      </div>
       <div className={barClass}></div>
     </header>
   );

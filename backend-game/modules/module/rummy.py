@@ -148,10 +148,10 @@ class RummyModule(Module):
                 if check_hand(player.cards):
                     self.central_stack = []
                     self.discard_stack = []
-                    for player in self.players:
+                    for player in self.players.values():
                         player.cards = []
 
-                    return EndRoundEngMsg(f"Player {player.name} won!")
+                    return EndRoundModMsg(f"Player {player.name} won!")
 
                 self.discard_stack.append(msg.action.card_id)
                 gract_lists.broadcast(MoveCardGract(msg.action.card_id, -2))

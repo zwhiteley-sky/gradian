@@ -44,15 +44,38 @@
   // Header positioning
   position: sticky;
   top: 0;
+  min-height: 4rem;
+  max-height: 4rem;
   height: 4rem;
 
   // Header styling
+  z-index: 10;
+  backdrop-filter: blur(7px);
+  background: linear-gradient(
+    to right,
+    #e8141644,
+    #ffa50044,
+    #faeb3644,
+    #79c31444,
+    #487de744,
+    #4b369d44,
+    #70369d44,
+    #e8141644
+  );
   box-shadow: 0 1px 20px 2px gray;
 
   // Item positioning
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
   overflow: hidden;
+
+  div {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+  }
 
   .bar {
     position: absolute;
@@ -60,11 +83,7 @@
     bottom: 0;
     height: 3px;
     width: 200%;
-    background: linear-gradient(
-      to right,
-      var(--rainbow),
-      var(--rainbow)
-    );
+    background: linear-gradient(to right, var(--rainbow), var(--rainbow));
     background-repeat: repeat-x;
 
     &.loading {
@@ -83,5 +102,13 @@
 
   h1 {
     font-size: 3rem;
+  }
+
+  a {
+    color: black;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    margin: 5px;
   }
 }

@@ -4,13 +4,11 @@ import LoadingProvider from "./providers/LoadingProvider";
 
 export default function Layout() {
   return (
-    <>
-      <LoadingProvider>
-        <div id="root-content">
-            <Header />
-            <Outlet />
-        </div>
-      </LoadingProvider>
-    </>
+    <LoadingProvider>
+      <div id="root-content">
+        <Header />
+        <Outlet />
+      </div>
+    </LoadingProvider>
   );
 }

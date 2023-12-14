@@ -1,12 +1,15 @@
 import styles from "./JoinGame.module.scss";
 import Input from "../components/Input";
 import Submit from "../components/Submit";
-import { FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useLoading } from "../providers/LoadingProvider";
+import Player from "../components/Player";
+import { JoinGameRequest } from "../lib/Game";
 
 export default function JoinGame() {
-  const [loading, setLoading] = useLoading();
-  const { Element: GameIdElement, valid: gameIdValid } = Input({
+  const [loading,] = useLoading();
+  const [request, setRequest] = useState(null as JoinGameRequest | null);
+  const { Element: GameIdElement, value: gameId, valid: gameIdValid } = Input({
     name: "game-id",
     placeholder: "Game ID",
     onValidate(value: string) {
@@ -16,7 +19,7 @@ export default function JoinGame() {
       return null;
     }
   });
-  const { Element: PlayerNameInput, valid: playerNameValid } = Input({
+  const { Element: PlayerNameInput, value: playerName, valid: playerNameValid } = Input({
     name: "player-name",
     placeholder: "Enter your player name",
     onValidate(value: string) {
@@ -27,8 +30,17 @@ export default function JoinGame() {
 
   function handlSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
+    if (!(gameIdValid && playerNameValid)) return;
+
+    setRequest({
+      type: "join",
+      gameId: Number(gameId),
+      playerName
+    });
+  }
+
+  if (request) {
+    return <Player request={request} />;
   }
 
   return (

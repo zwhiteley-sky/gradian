@@ -1,0 +1,78 @@
+.positioner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rainbow-box {
+  $border-radius: 20px;
+  $padding: 2px;
+  border-radius: calc($border-radius + $padding);
+  padding: $padding;
+  background: linear-gradient(to bottom right, var(--rainbow));
+
+  > div {
+    padding: 20px;
+    border-radius: $border-radius;
+    background-color: white;
+  }
+
+  .info, .warning {
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 30px;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+  }
+
+  .info {
+    border: 2px solid rgb(12, 1, 128);
+    background-color: #4c82ff;
+    color: darkblue;
+  }
+
+  .warning {
+    border: 2px solid rgb(128, 20, 1);
+    background-color: #ff2930;
+    color: darkred;
+  }
+
+  div.button-box {
+    $button-padding: 3px;
+    $button-radius: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: calc($button-padding + $button-radius);
+    padding: $button-padding;
+    background: linear-gradient(to right, var(--rainbow));
+    
+    button {
+      font-size: 1.2rem;
+      width: 100%;
+      background-color: white;
+      border-radius: $button-radius;
+      outline: none;
+      border: none;
+
+      &:hover {
+        color: white;
+        background: transparent;
+      }
+    }
+
+    &.disabled {
+      background: #666;
+
+      button {
+        color: black;
+        background: transparent;
+      }
+    }
+  }
+}
